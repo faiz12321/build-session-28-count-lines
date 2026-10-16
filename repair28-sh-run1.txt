@@ -1,0 +1,63 @@
+### CMD: python --version
+Python 3.12.3
+### EXIT: 0
+
+### CMD: python make_sample.py
+Created a new sample folder beside make_sample.py.
+It holds 5 made-up text files, plus 1 more in a subfolder.
+### EXIT: 0
+
+### CMD: python make_sample.py
+Stopped: sample already exists. Nothing was replaced or deleted.
+### EXIT: 1
+
+### CMD: python count_lines.py sample/journal.txt
+Lines: 11
+### EXIT: 0
+
+### CMD: python count_lines.py sample
+Line counts
+Folder: sample
+
+lines  blank  file
+-----  -----  ----
+    4      1  ideas.txt
+   12      0  journal.txt
+    3      0  old_mac.txt
+    0      0  scratch.txt
+    5      2  windows.txt
+
+5 files counted: 24 lines in total, 3 blank.
+### EXIT: 0
+
+### CMD: python -m unittest -v
+test_blank_lines (test_count_lines.CountFileTests.test_blank_lines) ... ok
+test_cr_only_endings (test_count_lines.CountFileTests.test_cr_only_endings) ... ok
+test_crlf_endings (test_count_lines.CountFileTests.test_crlf_endings) ... ok
+test_empty_file (test_count_lines.CountFileTests.test_empty_file) ... ok
+test_last_line_without_ending_still_counts (test_count_lines.CountFileTests.test_last_line_without_ending_still_counts) ... ok
+test_lf_endings (test_count_lines.CountFileTests.test_lf_endings) ... ok
+test_non_utf8_raises (test_count_lines.CountFileTests.test_non_utf8_raises) ... ok
+test_spaces_only_line_is_not_blank (test_count_lines.CountFileTests.test_spaces_only_line_is_not_blank) ... ok
+test_missing_folder (test_count_lines.MainTests.test_missing_folder) ... ok
+test_no_txt_files (test_count_lines.MainTests.test_no_txt_files) ... ok
+test_only_unreadable_txt (test_count_lines.MainTests.test_only_unreadable_txt) ... ok
+test_run_leaves_folder_unchanged (test_count_lines.MainTests.test_run_leaves_folder_unchanged) ... ok
+test_summary_line (test_count_lines.MainTests.test_summary_line) ... ok
+test_usage_error (test_count_lines.MainTests.test_usage_error) ... ok
+test_rerun_preserves_generated_folder_and_user_file (test_count_lines.SampleTests.test_rerun_preserves_generated_folder_and_user_file) ... ok
+test_sample_counts (test_count_lines.SampleTests.test_sample_counts) ... ok
+test_setup_refuses_existing_file (test_count_lines.SampleTests.test_setup_refuses_existing_file) ... ok
+test_setup_refuses_existing_folder_without_change (test_count_lines.SampleTests.test_setup_refuses_existing_folder_without_change) ... ok
+test_source_is_read_only (test_count_lines.SampleTests.test_source_is_read_only) ... ok
+test_names_sorted_ignoring_case (test_count_lines.ScanFolderTests.test_names_sorted_ignoring_case) ... ok
+test_non_txt_files_are_ignored (test_count_lines.ScanFolderTests.test_non_txt_files_are_ignored) ... ok
+test_subfolders_are_not_entered (test_count_lines.ScanFolderTests.test_subfolders_are_not_entered) ... ok
+test_unreadable_file_is_skipped (test_count_lines.ScanFolderTests.test_unreadable_file_is_skipped) ... ok
+test_uppercase_extension_counts (test_count_lines.ScanFolderTests.test_uppercase_extension_counts) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.068s
+
+OK
+### EXIT: 0
