@@ -1,39 +1,19 @@
-# Count lines in text files
+# Count lines in fictional text files
 
-Read-only teaching tool. Counts UTF-8 .txt files directly inside a folder,
-not subfolders. It uses str.splitlines, so it recognizes more line boundaries
-than LF, CR and CRLF. A last line without an ending counts; an empty line has
-no characters, while spaces-only lines are not blank. Invalid UTF-8 files are
-skipped. This is not a count of visually wrapped lines in an editor.
-
-File links are followed: a .txt link can read a target outside the chosen
-folder. Link handling is unchanged and is not covered by these fixture tests.
-
-## Practise
-
-Save all three files in a new empty lesson folder. Python 3 is required:
+Save three source files in a NEW empty lesson folder.
 
     python make_sample.py
     python count_lines.py sample
     python -m unittest -v
 
-Setup creates sample beside the script and refuses any existing sample path.
-It never deletes or resets an old sample. Use a different new empty lesson
-folder if it refuses. The contents are fictional text for line-count practice.
+Two Windows and two Ubuntu full replays run exact visible source versions. Final 38 small fixture tests pass (Unix pipe skips on Windows); symlink creation can skip where unavailable. Displayed stdout is first Windows output, not normalized or mixed. Pair differences are unittest time.
+Link/error changes only: refuse root/ancestor and direct-entry symbolic links/reparse points, hardlinks, special files and traversal. Metadata/list/open errors now stop with exit 2 instead of silent skips or false clean counts. Each direct entry is checked, even a non-.txt alias. Setup refuses linked parents/traversal and existing sample paths, without reset or deletion. Naive first version remains fictional-sample-only and must be replaced.
+Original top-level-only .txt selection, case-insensitive extension, UTF-8 decoding, splitlines and truly-empty-line definition, sort order and totals remain unchanged. Ordinary subfolders are ignored, not entered. Invalid UTF-8 files still list/skip and keep prior exit 0; this is not a complete-count certificate. Spaces-only lines remain nonblank. No unrelated encoding/count rule changed.
+The checker has no write/move/delete/network code but reads each counted file into memory. No size/time/resource limit, atomic snapshot or hostile-race defense. Stop editors/sync; entries can change between metadata and read. Filenames can be private. Small fictional fixtures are not proof on every filesystem. No desktop Windows/macOS recording. Recorder removes only its own temporary fixture folder. Decisions and feedback are teaching text, not recorded output.
 
-## Evidence
+MIT code. Python separately licensed/not included.
 
-24 tests use temporary fixtures, including the sample-count test. They cover
-line counting, CLI errors, unchanged source sizes/times, setup refusal for an
-existing file/folder, original bytes, nested sentinel data and repeat-run
-preservation. These are limited fixture checks, not universal safety proof.
+Reference: https://docs.python.org/3/library/os.html
 
-Two GitHub-hosted Windows recordings and two Ubuntu recordings pass all tests.
-The driver first saves the newline-character counter and records its undercount,
-then saves the final line counter, as the lesson shows. Displayed output uses
-first Windows output. Paired runs differ only in unittest elapsed time. Versions
-and test rendering can differ. No Windows desktop or macOS session was tested.
-
-## License
-
-MIT (see LICENSE).
+Windows pair: https://github.com/faiz12321/lesson-lab/actions/runs/38976283251
+Ubuntu pair: https://github.com/faiz12321/lesson-lab/actions/runs/38976344423
