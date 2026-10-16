@@ -1,34 +1,38 @@
-# Text file line counter
+# Count lines in text files
 
-`count_lines.py` counts the lines in the `.txt` files directly inside
-one folder and shows a small table, so you can see at a glance which
-notes are empty and which are long. It is read-only: it only looks,
-and it never changes, moves or deletes anything. Run it first on the
-made-up `sample` folder from `make_sample.py` before pointing it
-anywhere else.
+Read-only teaching tool. Counts UTF-8 .txt files directly inside a folder,
+not subfolders. It uses str.splitlines, so it recognizes more line boundaries
+than LF, CR and CRLF. A last line without an ending counts; an empty line has
+no characters, while spaces-only lines are not blank. Invalid UTF-8 files are
+skipped. This is not a count of visually wrapped lines in an editor.
 
-- Windows (CRLF), Mac/Linux (LF) and old Mac (CR) endings all count,
-  and a last line without an ending still counts.
-- A blank line is a line with no characters at all; a line of only
-  spaces is not blank.
-- Only the top level of the folder is counted; subfolders are not
-  entered. Files that are not valid UTF-8 text are skipped, with a
-  note at the end.
+File links are followed: a .txt link can read a target outside the chosen
+folder. Link handling is unchanged and is not covered by these fixture tests.
 
-## Use
+## Practise
+
+Save all three files in a new empty lesson folder. Python 3 is required:
 
     python make_sample.py
     python count_lines.py sample
-    python count_lines.py "C:\Users\you\Documents"
-
-If you leave out the folder, the current folder is counted.
-
-## Tests
-
     python -m unittest -v
 
-Works on Windows, Mac and Linux with Python 3.10 or newer. Nothing to
-install: it uses only what comes with Python.
+Setup creates sample beside the script and refuses any existing sample path.
+It never deletes or resets an old sample. Use a different new empty lesson
+folder if it refuses. The contents are fictional text for line-count practice.
+
+## Evidence
+
+24 tests use temporary fixtures, including the sample-count test. They cover
+line counting, CLI errors, unchanged source sizes/times, setup refusal for an
+existing file/folder, original bytes, nested sentinel data and repeat-run
+preservation. These are limited fixture checks, not universal safety proof.
+
+Two GitHub-hosted Windows recordings and two Ubuntu recordings pass all tests.
+The driver first saves the newline-character counter and records its undercount,
+then saves the final line counter, as the lesson shows. Displayed output uses
+first Windows output. Paired runs differ only in unittest elapsed time. Versions
+and test rendering can differ. No Windows desktop or macOS session was tested.
 
 ## License
 
