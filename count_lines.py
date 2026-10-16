@@ -16,11 +16,35 @@ FOLDER defaults to the current folder.
 """
 import os
 import sys
+import stat
+from pathlib import Path
+
+
+def safe_input(value, directory=False):
+    path = Path(value).absolute()
+    if '..' in path.parts:
+        raise OSError('Parent-traversal paths are unsupported.')
+    for part in [*reversed(path.parents), path]:
+        info = part.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, 'st_file_attributes', 0) & 0x400:
+            raise OSError('Links/reparse points are unsupported.')
+    info = path.lstat()
+    if directory:
+        if not stat.S_ISDIR(info.st_mode):
+            raise NotADirectoryError('Expected an ordinary directory.')
+    elif not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+        raise OSError('Expected an ordinary singly linked file.')
+    return path
+
+
+
+
+
 
 
 def count_file(path):
     """Return (total, blank) line counts for one UTF-8 text file."""
-    with open(path, "rb") as handle:
+    with open(safe_input(path), "rb") as handle:
         data = handle.read()
     lines = data.decode("utf-8").splitlines()
     blank = sum(1 for line in lines if line == "")
@@ -32,15 +56,19 @@ def scan_folder(root):
 
     rows holds (name, total, blank), sorted by name ignoring case.
     skipped holds names that could not be read as UTF-8 text."""
+    safe_input(root, directory=True)
     rows = []
     skipped = []
     for name in sorted(os.listdir(root), key=str.lower):
         full = os.path.join(root, name)
-        if not os.path.isfile(full) or not name.lower().endswith(".txt"):
+        info = Path(full).lstat()
+        directory = stat.S_ISDIR(info.st_mode)
+        safe_input(full, directory=directory)
+        if directory or not name.lower().endswith(".txt"):
             continue
         try:
             total, blank = count_file(full)
-        except (OSError, UnicodeDecodeError):
+        except UnicodeDecodeError:
             skipped.append(name)
             continue
         rows.append((name, total, blank))
@@ -52,10 +80,19 @@ def main(argv):
         print("Usage: python count_lines.py [FOLDER]", file=sys.stderr)
         return 2
     root = argv[1] if len(argv) == 2 else "."
+    try:
+        safe_input(root, directory=True)
+    except OSError as error:
+        print("No such folder: " + root + " (" + str(error) + ")", file=sys.stderr)
+        return 2
     if not os.path.isdir(root):
         print("No such folder: " + root, file=sys.stderr)
         return 2
-    rows, skipped = scan_folder(root)
+    try:
+        rows, skipped = scan_folder(root)
+    except OSError as error:
+        print("Could not complete line count: " + str(error), file=sys.stderr)
+        return 2
     print("Line counts")
     print("Folder: " + root)
     print()
