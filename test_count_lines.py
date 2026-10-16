@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 import count_lines
 
@@ -147,13 +148,54 @@ class MainTests(Base):
 
 
 class SampleTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.work = self.temp.name
+        shutil.copyfile(os.path.join(HERE, "make_sample.py"),
+                        os.path.join(self.work, "make_sample.py"))
+
+    def setup_run(self):
+        return subprocess.run([sys.executable, os.path.join(self.work, "make_sample.py")],
+                              capture_output=True, text=True)
+
     def test_sample_counts(self):
-        subprocess.run([sys.executable, os.path.join(HERE, "make_sample.py")],
-                       check=True, capture_output=True)
-        rc, out, _ = run_main(["count_lines.py", os.path.join(HERE, "sample")])
+        self.assertEqual(self.setup_run().returncode, 0)
+        rc, out, _ = run_main(["count_lines.py", os.path.join(self.work, "sample")])
         self.assertEqual(rc, 0)
         self.assertIn("5 files counted: 24 lines in total, 3 blank.", out)
         self.assertNotIn("skipped", out)
+
+    def snapshot(self, root):
+        return sorted((str(p.relative_to(root)), p.is_dir(), p.stat().st_size,
+                       p.stat().st_mtime_ns, p.read_bytes() if p.is_file() else None)
+                      for p in Path(root).rglob("*"))
+
+    def test_setup_refuses_existing_folder_without_change(self):
+        sample = Path(self.work) / "sample"
+        (sample / "unrelated").mkdir(parents=True)
+        (sample / "ideas.txt").write_bytes(b"ORIGINAL")
+        (sample / "unrelated" / "deep.txt").write_bytes(b"KEEP")
+        before = self.snapshot(sample)
+        result = self.setup_run()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Nothing was replaced or deleted", result.stderr)
+        self.assertEqual(before, self.snapshot(sample))
+
+    def test_setup_refuses_existing_file(self):
+        sample = Path(self.work) / "sample"
+        sample.write_bytes(b"ORIGINAL")
+        before = (sample.read_bytes(), sample.stat().st_mtime_ns)
+        self.assertNotEqual(self.setup_run().returncode, 0)
+        self.assertEqual(before, (sample.read_bytes(), sample.stat().st_mtime_ns))
+
+    def test_rerun_preserves_generated_folder_and_user_file(self):
+        self.assertEqual(self.setup_run().returncode, 0)
+        sample = Path(self.work) / "sample"
+        (sample / "user.txt").write_bytes(b"KEEP")
+        before = self.snapshot(sample)
+        self.assertNotEqual(self.setup_run().returncode, 0)
+        self.assertEqual(before, self.snapshot(sample))
 
     def test_source_is_read_only(self):
         with open(os.path.join(HERE, "count_lines.py"), "r") as handle:
